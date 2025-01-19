@@ -17,6 +17,7 @@
     "no-unused-vars": ["error", { "argsIgnorePattern": "req|res|next|val" }],
     "node/no-unsupported-features/es-syntax": "off",
     "arrow-body-style": "off",
-    "prefer-arrow-callback": "off"
+    "prefer-arrow-callback": "off",
+    "import/no-extraneous-dependencies": "off"
   }
 }
