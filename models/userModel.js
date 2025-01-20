@@ -32,8 +32,6 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-const User = mongoose.model('User', userSchema);
-
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
 
@@ -41,5 +39,7 @@ userSchema.pre('save', async function (next) {
   this.passwordConfirm = undefined;
   next();
 });
+
+const User = mongoose.model('User', userSchema);
 
 module.exports = User;

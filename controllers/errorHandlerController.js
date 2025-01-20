@@ -7,7 +7,7 @@ const castErrorDB = (err) => {
 
 const duplicateFieldError = (err) => {
   const value = err.errorResponse.errmsg.match(/(["'])(?:(?=(\\?))\2.)*?\1/)[0];
-  const message = `Duplicate field:${value}, Please change the name!`;
+  const message = `Duplicate value:${value}, Please change the field value!`;
   return new CustomError(message, 400);
 };
 
