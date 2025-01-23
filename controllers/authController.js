@@ -3,6 +3,7 @@ const { promisify } = require('util');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const CustomError = require('../utils/customError');
+const sendEmail = require('../utils/email');
 
 const secretToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -17,6 +18,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
     passwordChangedAt: req.body.passwordChangedAt,
+    role: req.body.role,
   });
 
   const token = secretToken(newUser._id);
@@ -73,10 +75,10 @@ exports.protect = catchAsync(async (req, res, next) => {
     return next(new CustomError('There is no user with that token', 401));
 
   //Check if user changed password after token was issued
-  if (currentUser.checkToken(decoded.iat))
+  if (currentUser.checkPasswordChange(decoded.iat))
     return next(
       new CustomError(
-        'The user changed their password, please login again!',
+        'User recently changed password! Please log in again!',
         401,
       ),
     );
@@ -84,4 +86,55 @@ exports.protect = catchAsync(async (req, res, next) => {
   //Calling the next middleware
   req.user = currentUser;
   next();
+});
+
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role))
+      return next(
+        new CustomError(
+          'You do not have permission to perform this action!',
+          403,
+        ),
+      );
+    next();
+  };
+};
+
+exports.forgetPassword = catchAsync(async (req, res, next) => {
+  //Get user basing on posted email
+  if (!req.body.email)
+    return next(new CustomError('Please Enter the email', 400));
+  const user = await User.findOne({ email: req.body.email });
+  if (!user)
+    return next(new CustomError('There is no user with that email', 404));
+
+  //Generate the random token
+  const resetToken = user.createPasswordResetToken();
+  await user.save({ validateBeforeSave: false });
+
+  //Send it to user's email
+  const requestUrl = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
+  const message = `You requested a password reset link. Here it is: ${requestUrl}`;
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: 'Password reset token (Expires in 10 minutes)',
+      message,
+    });
+    res.status(200).json({
+      status: 'success',
+      message: 'Token sent to email',
+    });
+  } catch (err) {
+    user.passwordResetToken = undefined;
+    user.passwordTokenExpire = undefined;
+    await user.save({ validateBeforeSave: false });
+    return next(
+      new CustomError(
+        'There was an error sending the email. Try again later!',
+        500,
+      ),
+    );
+  }
 });
