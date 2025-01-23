@@ -92,6 +92,8 @@ exports.updateTour = catchAsync(async (req, res, next) => {
     new: true,
     runValidators: true,
   });
+
+  if (!tour) return next(new CustomError('Not tour with that ID', 404));
   res.status(200).json({
     status: 'success',
     tour,
@@ -99,7 +101,9 @@ exports.updateTour = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteTour = catchAsync(async (req, res, next) => {
-  await Tour.findByIdAndDelete(req.params.id);
+  const tour = await Tour.findByIdAndDelete(req.params.id);
+
+  if (!tour) return next(new CustomError('No tour with that ID', 404));
   res.status(204).json({
     status: 'success',
   });

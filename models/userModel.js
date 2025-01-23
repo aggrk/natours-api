@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Password cannot be empty!'],
+    select: false,
     minlength: 8,
   },
   passwordConfirm: {
@@ -30,6 +31,7 @@ const userSchema = new mongoose.Schema({
       message: 'Passwords are not equal',
     },
   },
+  passwordChangedAt: Date,
 });
 
 userSchema.pre('save', async function (next) {
@@ -39,6 +41,22 @@ userSchema.pre('save', async function (next) {
   this.passwordConfirm = undefined;
   next();
 });
+
+userSchema.methods.comparePassword = async function (
+  enteredPassword,
+  userPassword,
+) {
+  return await bcrypt.compare(enteredPassword, userPassword);
+};
+
+userSchema.methods.checkToken = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changed = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+    return JWTTimestamp < changed;
+  }
+
+  return false;
+};
 
 const User = mongoose.model('User', userSchema);
 

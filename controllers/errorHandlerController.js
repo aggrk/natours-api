@@ -17,6 +17,8 @@ const validationError = (err) => {
   return new CustomError(message, 400);
 };
 
+const handleJWTError = () => new CustomError('Invalid token', 401);
+
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -52,6 +54,7 @@ module.exports = (err, req, res, next) => {
     if (err.name === 'CastError') error = castErrorDB(error);
     if (err.code === 11000) error = duplicateFieldError(error);
     if (err.name === 'ValidationError') error = validationError(error);
+    if (err.name === 'JsonWebTokenError') error = handleJWTError();
     sendErrorProd(error, res);
   }
 };
