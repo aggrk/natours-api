@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
 const User = require('../models/userModel');
@@ -101,7 +102,7 @@ exports.restrictTo = (...roles) => {
   };
 };
 
-exports.forgetPassword = catchAsync(async (req, res, next) => {
+exports.forgotPassword = catchAsync(async (req, res, next) => {
   //Get user basing on posted email
   if (!req.body.email)
     return next(new CustomError('Please Enter the email', 400));
@@ -137,4 +138,37 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
       ),
     );
   }
+});
+
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  //Get user based on the token
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(req.params.token)
+    .digest('hex');
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordTokenExpire: { $gt: Date.now() },
+  });
+
+  //If token has not epired, and there is user, set the new password
+  if (!user)
+    return next(new CustomError('Invalid token or token expired!', 400));
+
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  user.passwordResetToken = undefined;
+  user.passwordTokenExpire = undefined;
+  await user.save();
+
+  //Update passwordChangedAt by creating a middleware in the model
+
+  //Login the user in, Send JWT
+  const token = secretToken(user._id);
+
+  res.status(201).json({
+    status: 'success',
+    token,
+  });
 });
