@@ -1,5 +1,11 @@
 const express = require('express');
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const hpp = require('hpp');
+
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const CustomError = require('./utils/customError');
@@ -7,11 +13,44 @@ const errorHandler = require('./controllers/errorHandlerController');
 
 const app = express();
 
+//Global middlewares
+
+//Rate limiting
+const limiter = rateLimit({
+  limit: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many request from this IP, please try again after an hour',
+});
+
+//Set security http headers
+app.use(helmet());
+
+//Data sanitization from NoSQL injection
+app.use(mongoSanitize());
+
+//Data sanitization from xss
+app.use(xss());
+
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
-app.use(express.json());
 
+app.use(express.json({ limit: '100kb' }));
+
+app.use('/api', limiter);
+
+//Preventing parameter polution
+app.use(
+  hpp({
+    whitelist: [
+      'duration',
+      'ratingsQuantity',
+      'price',
+      'difficulty',
+      'ratingsAverage',
+    ],
+  }),
+);
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
