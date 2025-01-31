@@ -163,5 +163,5 @@ This documentation provides detailed information about the endpoints available i
 
 ---
 
-📌 **This documentation helps developers interact effectively with the Natours API.** 
+📌 **That's It** 
 
