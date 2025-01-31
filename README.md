@@ -10,7 +10,7 @@ This documentation provides detailed information about the endpoints available i
 - **Method:** `GET`
 - **Endpoint:** `/api/v1/tours`
 - **Description:** Retrieves a list of all available tours, supporting filtering, sorting, pagination, and field limiting.  
-- **Example:**  
+- **Example:**  `/api/v1/tours?price[gt]=500&sort=price&limit=5&page=2&fields=name,price`
 
 ### **Get a Tour**
 - **Method:** `GET`
@@ -27,17 +27,17 @@ This documentation provides detailed information about the endpoints available i
 - **Endpoint:** `/api/v1/tours/tour-stats`
 - **Description:** Retrieves aggregated statistics about tours, such as average price.
 
-### **Create a Tour** *(Admin Only)*
+### **Create a Tour** *(Admin and Lead guide Only)*
 - **Method:** `POST`
 - **Endpoint:** `/api/v1/tours`
 - **Description:** Creates a new tour with details such as name, duration, price, and description.
 
-### **Delete a Tour** *(Admin Only)*
+### **Delete a Tour** *(Admin and Lead guide Only)*
 - **Method:** `DELETE`
 - **Endpoint:** `/api/v1/tours/:id`
 - **Description:** Deletes a specific tour based on its ID.
 
-### **Update a Tour** *(Admin Only)*
+### **Update a Tour** *(Admin and Lead guide Only)*
 - **Method:** `PATCH`
 - **Endpoint:** `/api/v1/tours/:id`
 - **Description:** Updates details of a specific tour.
@@ -87,27 +87,27 @@ This documentation provides detailed information about the endpoints available i
 
 ### **Signup**
 - **Method:** `POST`
-- **Endpoint:** `/api/v1/auth/signup`
+- **Endpoint:** `/api/v1/users/signup`
 - **Description:** Allows a new user to sign up by providing their name, email, and password.
 
 ### **Login**
 - **Method:** `POST`
-- **Endpoint:** `/api/v1/auth/login`
+- **Endpoint:** `/api/v1/users/login`
 - **Description:** Allows a user to log in by providing their email and password.
 
 ### **Forgot Password**
 - **Method:** `POST`
-- **Endpoint:** `/api/v1/auth/forgot-password`
+- **Endpoint:** `/api/v1/users/forgotPassword`
 - **Description:** Allows a user to request a password reset link.
 
 ### **Reset Password**
 - **Method:** `PATCH`
-- **Endpoint:** `/api/v1/auth/reset-password/:token`
+- **Endpoint:** `/api/v1/users/resetPassword/:token`
 - **Description:** Allows a user to reset their password using a token received via email.
 
 ### **Update Password** *(User Only)*
 - **Method:** `PATCH`
-- **Endpoint:** `/api/v1/auth/update-password`
+- **Endpoint:** `/api/v1/users/updatePassword`
 - **Description:** Allows a logged-in user to update their password.
 
 ---
