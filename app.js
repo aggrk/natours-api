@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
+const cors = require('cors');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -15,7 +16,7 @@ const errorHandler = require('./controllers/errorHandlerController');
 const app = express();
 
 //Global middlewares
-
+app.use(cors());
 //Rate limiting
 const limiter = rateLimit({
   limit: 100,
