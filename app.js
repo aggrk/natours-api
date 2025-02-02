@@ -16,7 +16,12 @@ const errorHandler = require('./controllers/errorHandlerController');
 const app = express();
 
 //Global middlewares
-app.use(cors());
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+  }),
+);
 //Rate limiting
 const limiter = rateLimit({
   limit: 100,
