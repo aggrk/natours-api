@@ -16,17 +16,15 @@ const errorHandler = require('./controllers/errorHandlerController');
 const app = express();
 
 //Global middlewares
-app.use(
-  cors({
-    origin: 'http://localhost:5173',
-    credentials: true,
-  }),
-);
+app.use(cors());
 //Rate limiting
+app.set('trust proxy', 1);
 const limiter = rateLimit({
   limit: 100,
   windowMs: 60 * 60 * 1000,
   message: 'Too many request from this IP, please try again after an hour',
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 //Set security http headers
