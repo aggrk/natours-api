@@ -8,7 +8,6 @@ process.on('uncaughtException', (err) => {
 });
 
 dotenv.config({ path: './config.env' });
-const { prototype } = require('nodemailer/lib/sendmail-transport');
 const app = require('./app');
 
 const DB = process.env.DATABASE.replace(

@@ -17,8 +17,8 @@ const app = express();
 
 //Global middlewares
 app.use(cors());
+app.options('*', cors());
 //Rate limiting
-app.set('trust proxy', 1);
 const limiter = rateLimit({
   limit: 100,
   windowMs: 60 * 60 * 1000,
