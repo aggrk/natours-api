@@ -63,6 +63,15 @@ exports.login = catchAsync(async (req, res, next) => {
   createAndSendToken(user, 200, res);
 });
 
+exports.logout = (req, res) => {
+  res.clearCookie('jwt', 'loggedout', {
+    httpOnly: true,
+    // secure: process.env.NODE_ENV === 'production'
+  });
+
+  return res.status(200).json({ status: 'success' });
+};
+
 exports.protect = catchAsync(async (req, res, next) => {
   //Getting token and checking if it's there
   let token;
@@ -71,6 +80,10 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (!token && req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
 
   if (!token)
@@ -124,7 +137,8 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   //Send it to user's email
-  const requestUrl = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
+  // const requestUrl = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
+  const requestUrl = `${process.env.FRONTEND_URL}/resetPassword/${resetToken}`;
   const message = `You requested a password reset link. Here it is: ${requestUrl}`;
   try {
     await sendEmail({

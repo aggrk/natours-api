@@ -6,30 +6,39 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const favoriteRouter = require('./routes/favoriteRoutes');
 const CustomError = require('./utils/customError');
 const errorHandler = require('./controllers/errorHandlerController');
 
 const app = express();
 
+app.use(cookieParser());
+
 //Global middlewares
-app.use(cors());
+app.use(
+  cors({
+    // origin: '*',
+    origin: [
+      'http://127.0.0.1:5173',
+      'http://localhost:5173',
+      'http://192.168.1.114:8081',
+      'http://localhost:8081',
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }),
+);
+
 app.options('*', cors());
-//Rate limiting
-app.set('trust proxy', 1);
-const limiter = rateLimit({
-  limit: 100,
-  windowMs: 60 * 60 * 1000,
-  message: 'Too many request from this IP, please try again after an hour',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
 
 //Set security http headers
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: false }));
 
 //Data sanitization from NoSQL injection
 app.use(mongoSanitize());
@@ -42,6 +51,17 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 app.use(express.json({ limit: '100kb' }));
+app.use(express.static('public'));
+
+//Rate limiting
+app.set('trust proxy', 1);
+const limiter = rateLimit({
+  limit: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many request from this IP, please try again after an hour',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 app.use('/api', limiter);
 
@@ -66,6 +86,7 @@ app.use((req, res, next) => {
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/favorites', favoriteRouter);
 
 //HANDLING UNMATCHED ROUTES
 app.all('*', (req, res, next) => {
