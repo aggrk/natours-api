@@ -12,6 +12,7 @@ const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const favoriteRouter = require('./routes/favoriteRoutes');
+const activityRouter = require('./routes/activityRoutes');
 const CustomError = require('./utils/customError');
 const errorHandler = require('./controllers/errorHandlerController');
 
@@ -88,6 +89,7 @@ app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
 app.use('/api/v1/favorites', favoriteRouter);
+app.use('/api/v1/activities', activityRouter);
 
 //HANDLING UNMATCHED ROUTES
 app.all('*', (req, res, next) => {

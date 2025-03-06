@@ -4,6 +4,7 @@ const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const CustomError = require('../utils/customError');
 const handlers = require('./handlers');
+const { createActivity } = require('./activityController');
 
 // const multerStorage = multer.diskStorage({
 //   destination: (req, file, cb) => {
@@ -72,6 +73,8 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   //Filter out unwanted fields name that are not allowed
   const filtered = filterUnwantedFields(req.body, 'name', 'email');
   if (req.file) filtered.photo = req.file.filename;
+
+  await createActivity(req.user.id, 'Updated your details');
 
   //Update user document
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filtered, {
