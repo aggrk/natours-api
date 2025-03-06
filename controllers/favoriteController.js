@@ -1,7 +1,8 @@
 const catchAsync = require('../utils/catchAsync');
 const Favorite = require('../models/favoriteModel');
-const handlers = require('./handlers');
+// const handlers = require('./handlers');
 const { createActivity } = require('./activityController');
+const CustomError = require('../utils/customError');
 
 exports.createFavorite = catchAsync(async (req, res, next) => {
   req.body.user = req.user.id;
@@ -24,4 +25,13 @@ exports.getAllFavorites = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.deleteFavorite = handlers.deleteOne(Favorite);
+exports.deleteFavorite = catchAsync(async (req, res, next) => {
+  const doc = await Favorite.findByIdAndDelete(req.params.id);
+
+  if (!doc) return next(new CustomError('No document with that ID', 404));
+  await createActivity(req.user.id, 'Deleted a tour from favorites');
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});
